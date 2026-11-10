@@ -45,7 +45,7 @@ tools:
       required: [query]
 
   - name: lookup
-    description: "Tra cứu thông tin trên internet."
+    description: "Tra cứu thông tin trên internet. Giữ query ngắn gọn theo đúng chủ đề người dùng yêu cầu, không tự thêm từ như news hoặc latest vào query. Phân loại nội dung bằng topic riêng: dùng news khi tìm tin tức, general khi tra cứu thông tin thông thường. Chọn timeframe theo khoảng thời gian người dùng yêu cầu."
     parameters:
       type: object
       properties:

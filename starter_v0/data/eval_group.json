@@ -1,7 +1,282 @@
 {
   "dataset_id": "day03_v2_research_group",
   "dataset_role": "group",
-  "description": "Case do NHÓM tự viết thêm để cover thêm trường hợp. Mỗi case cần: id, phase='B', query HOẶC turns, failure_type (thuộc allowed_failure_types), và expect (tool_calls[...] hoặc no_tool=true). Nên kèm metadata.what_it_tests.",
-  "allowed_failure_types": ["wrong_tool", "wrong_arg_value", "wrong_boundary", "unnecessary_tool", "out_of_scope", "missing_info"],
-  "cases": []
+  "description": "Custom evaluation dataset for Part 04. Includes 5 single-turn and 5 multi-turn cases, including coverage for the new compare_sources tool.",
+  "cases": [
+    {
+      "id": "G01_compare_sources_urls",
+      "phase": "B",
+      "suite": "group",
+      "query": "So sánh nguồn của các URL này và cho biết chúng đến từ bao nhiêu website khác nhau: https://openai.com/research và https://www.openai.com/blog, https://arxiv.org/abs/2301.00001",
+      "failure_type": "wrong_tool",
+      "expect": {
+        "tool_calls": [
+          {
+            "name": "compare_sources",
+            "args": {
+              "urls": [
+                "https://openai.com/research",
+                "https://www.openai.com/blog",
+                "https://arxiv.org/abs/2301.00001"
+              ]
+            }
+          }
+        ]
+      },
+      "metadata": {
+        "skill": "source_comparison",
+        "difficulty": "easy",
+        "what_it_tests": "Chọn compare_sources khi người dùng cung cấp danh sách URL và muốn nhóm, đếm nguồn theo tên miền."
+      }
+    },
+    {
+      "id": "G02_lookup_ai_news",
+      "phase": "B",
+      "suite": "group",
+      "query": "Tra cứu các nghiên cứu mới về ứng dụng AI trong quản lý năng lượng tòa nhà trong tuần này.",
+      "failure_type": "wrong_arg_value",
+      "expect": {
+        "tool_calls": [
+          {
+            "name": "lookup",
+            "args": {
+              "query": "AI trong quản lý năng lượng tòa nhà",
+              "topic": "news",
+              "timeframe": "week"
+            }
+          }
+        ]
+      },
+      "metadata": {
+        "skill": "web_research",
+        "difficulty": "medium",
+        "what_it_tests": "Tách chủ đề tìm kiếm khỏi bộ lọc news và chọn đúng timeframe theo yêu cầu."
+      }
+    },
+    {
+      "id": "G03_social_search_latest",
+      "phase": "B",
+      "suite": "group",
+      "query": "Tìm các bài đăng mới nhất trên mạng xã hội về MQTT trong IoT công nghiệp, lấy tối đa 5 kết quả.",
+      "failure_type": "wrong_tool",
+      "expect": {
+        "tool_calls": [
+          {
+            "name": "social_search",
+            "args": {
+              "query": "MQTT trong IoT công nghiệp",
+              "search_type": "Latest",
+              "limit": 5
+            }
+          }
+        ]
+      },
+      "metadata": {
+        "skill": "social_research",
+        "difficulty": "medium",
+        "what_it_tests": "Chọn social_search thay vì lookup và truyền đúng loại sắp xếp cùng giới hạn kết quả."
+      }
+    },
+    {
+      "id": "G04_missing_url_fetch",
+      "phase": "B",
+      "suite": "group",
+      "query": "Đọc nội dung bài báo đó và tóm tắt giúp tôi.",
+      "failure_type": "missing_info",
+      "expect": {
+        "tool_calls": [
+          {
+            "name": "clarify",
+            "args": {
+              "question": "Bạn gửi URL của bài báo cần đọc được không?",
+              "response_type": "text"
+            }
+          }
+        ]
+      },
+      "metadata": {
+        "skill": "clarification",
+        "difficulty": "easy",
+        "what_it_tests": "Không tự đoán hoặc bịa URL khi người dùng chưa cung cấp liên kết."
+      }
+    },
+    {
+      "id": "G05_out_of_scope_code",
+      "phase": "B",
+      "suite": "group",
+      "query": "Viết giúp tôi một hàm Python tính số Fibonacci thứ n.",
+      "failure_type": "out_of_scope",
+      "expect": {
+        "no_tool": true,
+        "behavior": "refuse"
+      },
+      "metadata": {
+        "skill": "scope_control",
+        "difficulty": "easy",
+        "what_it_tests": "Nhận diện yêu cầu lập trình không cần các công cụ research và không gọi tool không liên quan."
+      }
+    },
+    {
+      "id": "GM01_compare_sources_after_context",
+      "phase": "B",
+      "suite": "group",
+      "turns": [
+        {
+          "role": "user",
+          "content": "Tôi có hai nguồn để đối chiếu: https://www.nature.com/articles/example và https://arxiv.org/abs/2401.12345."
+        },
+        {
+          "role": "user",
+          "content": "Hãy nhóm theo tên miền và đếm xem có bao nhiêu website khác nhau."
+        }
+      ],
+      "failure_type": "wrong_tool",
+      "expect": {
+        "tool_calls": [
+          {
+            "name": "compare_sources",
+            "args": {
+              "urls": [
+                "https://www.nature.com/articles/example",
+                "https://arxiv.org/abs/2401.12345"
+              ]
+            }
+          }
+        ]
+      },
+      "metadata": {
+        "skill": "source_comparison",
+        "difficulty": "medium",
+        "what_it_tests": "Giữ và sử dụng danh sách URL đã xuất hiện ở lượt trước khi người dùng yêu cầu đếm nguồn."
+      }
+    },
+    {
+      "id": "GM02_clarify_then_timeline",
+      "phase": "B",
+      "suite": "group",
+      "turns": [
+        {
+          "role": "user",
+          "content": "Lấy 5 bài đăng gần đây nhất của tài khoản này."
+        },
+        {
+          "role": "user",
+          "content": "Tài khoản là sama."
+        }
+      ],
+      "failure_type": "missing_info",
+      "expect": {
+        "tool_calls": [
+          {
+            "name": "timeline",
+            "args": {
+              "screenname": "sama",
+              "limit": 5
+            }
+          }
+        ]
+      },
+      "metadata": {
+        "skill": "multiturn_clarification",
+        "difficulty": "medium",
+        "what_it_tests": "Sau khi hỏi làm rõ thông tin tài khoản, sử dụng câu trả lời ở lượt sau để gọi timeline."
+      }
+    },
+    {
+      "id": "GM03_clarify_then_fetch",
+      "phase": "B",
+      "suite": "group",
+      "turns": [
+        {
+          "role": "user",
+          "content": "Hãy đọc và tóm tắt nội dung URL này."
+        },
+        {
+          "role": "user",
+          "content": "URL là https://example.com/research-report."
+        }
+      ],
+      "failure_type": "missing_info",
+      "expect": {
+        "tool_calls": [
+          {
+            "name": "fetch",
+            "args": {
+              "url": "https://example.com/research-report"
+            }
+          }
+        ]
+      },
+      "metadata": {
+        "skill": "multiturn_clarification",
+        "difficulty": "medium",
+        "what_it_tests": "Không gọi fetch với URL tự suy đoán; dùng URL người dùng bổ sung ở lượt tiếp theo."
+      }
+    },
+    {
+      "id": "GM04_carry_timeframe",
+      "phase": "B",
+      "suite": "group",
+      "turns": [
+        {
+          "role": "user",
+          "content": "Tìm tin tức về AI hôm nay."
+        },
+        {
+          "role": "user",
+          "content": "Cũng tìm về robotics với cùng khoảng thời gian đó."
+        }
+      ],
+      "failure_type": "wrong_arg_value",
+      "expect": {
+        "tool_calls": [
+          {
+            "name": "lookup",
+            "args": {
+              "query": "robotics",
+              "topic": "news",
+              "timeframe": "day"
+            }
+          }
+        ]
+      },
+      "metadata": {
+        "skill": "multiturn_context",
+        "difficulty": "medium",
+        "what_it_tests": "Kế thừa timeframe và loại nội dung news từ lượt trước, chỉ thay đổi chủ đề sang robotics."
+      }
+    },
+    {
+      "id": "GM05_correct_timeline_account_and_limit",
+      "phase": "B",
+      "suite": "group",
+      "turns": [
+        {
+          "role": "user",
+          "content": "Lấy 10 bài đăng gần đây của Elon Musk."
+        },
+        {
+          "role": "user",
+          "content": "Đổi số lượng thành 3 bài, vẫn là Elon Musk."
+        }
+      ],
+      "failure_type": "wrong_arg_value",
+      "expect": {
+        "tool_calls": [
+          {
+            "name": "timeline",
+            "args": {
+              "screenname": "elonmusk",
+              "limit": 3
+            }
+          }
+        ]
+      },
+      "metadata": {
+        "skill": "multiturn_context",
+        "difficulty": "easy",
+        "what_it_tests": "Chỉ cập nhật limit theo yêu cầu mới và giữ nguyên đối tượng Elon Musk."
+      }
+    }
+  ]
 }
