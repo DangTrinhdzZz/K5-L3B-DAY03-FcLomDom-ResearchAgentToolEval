@@ -1,18 +1,9 @@
-# starter_v0 — tool declarations (intentionally vague).
-# Names and descriptions here are a rough first draft. Routing rules, name->handle
-# mapping, arg conventions (news/timeframe/Top), and the send-confirmation boundary
-# are NOT spelled out anywhere yet. Your job is to make these declarations + the
-# system prompt good enough that the agent routes correctly on the eval.
+# starter_v0 — tool declarations (v3, corrected after merge).
 #
 # If you rename a tool, keep the name in sync across:
 #   this file  ->  tools/__init__.py (TOOL_FUNCTIONS)  ->  data/eval_base.json + data/eval_research_extension.json
 # `pytest tests/test_tool_contract.py` checks this sync for you.
 #
-# TODO CP2 (student):
-#   - Rewrite every description: what it does, WHEN to use it, WHEN NOT to use it.
-#   - Spell out arg conventions in parameter descriptions (handle format, topic/timeframe, search_type).
-#   - Make the `send` confirmation boundary explicit.
-#   - Declare your new tool(s) at the end of this file.
 tools:
   # ---------------- Core tools ----------------
   - name: clarify
@@ -58,7 +49,6 @@ tools:
       required: [query]
 
   - name: lookup
-  - name: lookup
     description: >-
       Tìm kiếm trên web (tin tức, bài viết, thông tin chung). Dùng khi người dùng
       muốn tin tức hoặc thông tin trên internet, kể cả khi họ đổi từ Twitter sang
@@ -73,24 +63,17 @@ tools:
         timeframe: {type: string, enum: [day, week, month, year], default: "week", description: "Theo mốc người dùng nói: hôm nay -> day, tuần này -> week, tháng này -> month, năm nay -> year. Ở lượt sau giữ mốc thời gian của lượt trước nếu người dùng không đổi"}
         max_results: {type: integer, default: 5, description: "Số kết quả"}
       required: [query]
-    parameters:
-      type: object
-      properties:
-        query: {type: string, default: "", description: "Chỉ chủ đề chính, không thêm các chữ như tin tức/news/hôm nay. Ví dụ: \"Tin tức AI hôm nay\" -> \"AI\""}
-        topic: {type: string, enum: [general, news], default: "general", description: "news khi người dùng hỏi tin/tin tức/bản tin/có gì mới, kể cả khi đi kèm web; general cho thông tin chung"}
-        timeframe: {type: string, enum: [day, week, month, year], default: "week", description: "Theo mốc người dùng nói: hôm nay -> day, tuần này -> week, tháng này -> month, năm nay -> year. Ở lượt sau giữ mốc thời gian của lượt trước nếu người dùng không đổi"}
-        max_results: {type: integer, default: 5, description: "Số kết quả"}
-      required: [query]
 
   - name: fetch
     description: >-
-      Đọc nội dung một URL cụ thể mà người dùng đã đưa. Dùng khi có URL đầy đủ để
-      tóm tắt/đọc. KHÔNG dùng khi không có URL (gọi clarify để hỏi URL), và không
-      bao giờ tự bịa URL.
+      Đọc nội dung của một URL HTTP/HTTPS cụ thể bằng Firecrawl. Dùng khi người
+      dùng cung cấp URL và muốn đọc hoặc tóm tắt trang đó. KHÔNG dùng để tìm
+      nguồn mới (dùng lookup), tìm bài báo arXiv theo chủ đề (dùng papers),
+      hoặc khi chưa có URL (dùng clarify).
     parameters:
       type: object
       properties:
-        url: {type: string, default: "", description: "URL tuyệt đối đúng như người dùng cung cấp, bắt đầu bằng http:// hoặc https://"}
+        url: {type: string, default: "", description: "URL HTTP/HTTPS đầy đủ do người dùng cung cấp hoặc đã thu thập được, không tự bịa địa chỉ"}
       required: [url]
 
   - name: format
