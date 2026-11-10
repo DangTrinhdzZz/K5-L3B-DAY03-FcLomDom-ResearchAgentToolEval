@@ -1,12 +1,12 @@
 """TODO CP3 (student): Tool Unit Test Challenge.
 
-Each test below is a stub. Replace `pytest.skip(...)` with a real test.
+The starter challenge marks unfinished tests with `pytest.skip(...)`.
 Patterns to copy are in test_tools_examples.py. Fixtures are in conftest.py.
 
 Rules:
 - Offline only: mock HTTP with `fake_http`, set fake keys with `monkeypatch.setenv`.
 - One behaviour per test. Name the test after the behaviour, not the function.
-- Done = `pytest tests/ -v` shows 0 skipped, 0 failed.
+- The bonus challenge is complete when `pytest tests/ -v` shows 0 skipped and 0 failed.
 """
 from __future__ import annotations
 
@@ -14,6 +14,7 @@ import pytest
 
 from conftest import FakeResponse  # noqa: F401  (you will need it)
 from tools import TOOL_FUNCTIONS  # noqa: F401
+from tools.compare_sources.tool import compare_sources
 
 TODO = "TODO CP3 (student): implement this test"
 
@@ -110,13 +111,60 @@ def test_policy_instruction_like_lines_go_to_untrusted_text() -> None:
 #   2. bad / missing input from the model (empty string, wrong type, out-of-enum value)
 #   3. failure path (missing key, HTTP error, timeout) -> returns error dict, does not raise
 
-def test_my_new_tool_happy_path() -> None:
-    pytest.skip(TODO)
+def test_compare_sources_groups_urls_by_normalized_domain() -> None:
+    result = compare_sources([
+        " https://WWW.example.com/a ",
+        "https://example.org/b",
+        "https://example.com:443/c",
+        "https://WWW.example.com/a",
+    ])
+
+    assert result == {
+        "tool": "compare_sources",
+        "domain_count": 2,
+        "url_count": 3,
+        "groups": [
+            {"domain": "example.com", "urls": ["https://WWW.example.com/a", "https://example.com:443/c"]},
+            {"domain": "example.org", "urls": ["https://example.org/b"]},
+        ],
+    }
 
 
-def test_my_new_tool_bad_input_from_model() -> None:
-    pytest.skip(TODO)
+@pytest.mark.parametrize("urls", [None, [], "https://example.com"])
+def test_compare_sources_rejects_missing_or_non_list_input(urls) -> None:
+    assert compare_sources(urls) == {
+        "tool": "compare_sources",
+        "error": "ValueError",
+        "message": "urls must be a non-empty list of URL strings",
+    }
 
 
-def test_my_new_tool_failure_returns_error_dict() -> None:
-    pytest.skip(TODO)
+@pytest.mark.parametrize("value", [42, " "])
+def test_compare_sources_rejects_invalid_list_item(value) -> None:
+    assert compare_sources([value]) == {
+        "tool": "compare_sources",
+        "error": "ValueError",
+        "message": "urls[0] must be a non-empty string",
+    }
+
+
+@pytest.mark.parametrize("url", ["example.com/path", "ftp://example.com/a", "https://exa mple.com"])
+def test_compare_sources_rejects_unsupported_url(url) -> None:
+    assert compare_sources(["https://example.com", url]) == {
+        "tool": "compare_sources",
+        "error": "ValueError",
+        "message": "urls[1] must be an absolute HTTP or HTTPS URL",
+    }
+
+
+@pytest.mark.parametrize("url", [
+    "https://[bad-host",
+    "https://example.com:abc/a",
+    "https://example.com:65536/a",
+])
+def test_compare_sources_returns_error_for_malformed_host_or_port(url) -> None:
+    assert compare_sources([url]) == {
+        "tool": "compare_sources",
+        "error": "ValueError",
+        "message": "urls[0] has a malformed host or port",
+    }

@@ -14,7 +14,7 @@
 | STT | Vai trò | MSSV | Họ và tên | GitHub | Nhánh làm việc |
 | --- | --- | --- | --- | --- | --- |
 | 1 | TV1 — Trưởng nhóm | 2A202603874 | Triệu Hải Đăng Trình | [DangTrinhdzZz](https://github.com/DangTrinhdzZz) | `trinh` |
-| 2 | TV2 — Thành viên | 2A202603870 | *Chưa xác nhận* | [dkhanhdev](https://github.com/dkhanhdev) | `test2` |
+| 2 | TV2 — Thành viên | 2A202603870 | Ngô Duy Khánh | [dkhanhdev](https://github.com/dkhanhdev) | `test2` |
 | 3 | TV3 — Thành viên | 2A202603898 | *Chưa xác nhận* | [MinhNGD76](https://github.com/MinhNGD76) | `minhnd` |
 | 4 | TV4 — Thành viên | 2A202603829 | *Chưa xác nhận* | [thangdktd](https://github.com/thangdktd) | `thangdktd` |
 
@@ -33,4 +33,4 @@
 - Không commit `.env`, API keys hoặc thông tin nhạy cảm.
 - Không tự ý sửa bộ dữ liệu baseline hoặc thay đổi phạm vi nhiệm vụ của thành viên khác.
 
-> **Cần bổ sung trước khi nộp:** Họ và tên chính xác của TV2, TV3, TV4. Các trường này được để trống có chủ đích để tránh ghi sai thông tin.
+> **Cần bổ sung trước khi nộp:** Họ và tên chính xác của TV3 và TV4.
