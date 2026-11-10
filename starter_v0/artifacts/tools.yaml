@@ -58,12 +58,21 @@ tools:
       required: [query]
 
   - name: lookup
+  - name: lookup
     description: >-
       Tìm kiếm trên web (tin tức, bài viết, thông tin chung). Dùng khi người dùng
       muốn tin tức hoặc thông tin trên internet, kể cả khi họ đổi từ Twitter sang
       web. KHÔNG dùng khi đã có URL cụ thể (dùng fetch) hoặc khi hỏi tweet (dùng
       timeline/social_search). Nếu yêu cầu gồm cả web và tweet thì gọi cả lookup
       và social_search.
+    parameters:
+      type: object
+      properties:
+        query: {type: string, default: "", description: "Chỉ chủ đề chính, không thêm các chữ như tin tức/news/hôm nay. Ví dụ: \"Tin tức AI hôm nay\" -> \"AI\""}
+        topic: {type: string, enum: [general, news], default: "general", description: "news khi người dùng hỏi tin/tin tức/bản tin/có gì mới, kể cả khi đi kèm web; general cho thông tin chung"}
+        timeframe: {type: string, enum: [day, week, month, year], default: "week", description: "Theo mốc người dùng nói: hôm nay -> day, tuần này -> week, tháng này -> month, năm nay -> year. Ở lượt sau giữ mốc thời gian của lượt trước nếu người dùng không đổi"}
+        max_results: {type: integer, default: 5, description: "Số kết quả"}
+      required: [query]
     parameters:
       type: object
       properties:
